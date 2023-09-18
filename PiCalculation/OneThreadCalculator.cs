@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
-using System.Drawing;
 
 namespace PiCalculation
 {
-    internal class OneThreadCalculator : PiCalculator
+    public class OneThreadCalculator : PiCalculator
     {
         public OneThreadCalculator(int pointsCount) : base(pointsCount)
         {
@@ -13,31 +12,16 @@ namespace PiCalculation
         {
             Stopwatch timer = Stopwatch.StartNew();
 
-            var points = new List<Point>(pointsCount);
-            for (int i = 0; i < pointsCount; i++)
-            {
-                Point p = GeneratePoint();
-                points.Add(p);
-            }
-
+            IList<Point> points = Point.GeneratePoints(pointsCount);
             double pi = CalculatePi(points);
-            timer.Stop();
 
+            timer.Stop();
             return new PiCalculationResult(pi, timer.Elapsed);
         }
-        
-        private static double CalculatePi(ICollection<Point> points)
+
+        public override string ToString()
         {
-            int inside = 0;
-            foreach (Point p in points)
-            {
-                if (IsInside(p.X, p.Y))
-                {
-                    inside++;
-                }
-            }
-            double pi = 4.0 / points.Count * inside;
-            return pi;
+            return "One Thread";
         }
     }
 }
