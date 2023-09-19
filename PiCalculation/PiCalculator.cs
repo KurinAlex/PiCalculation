@@ -2,27 +2,44 @@
 {
     public abstract class PiCalculator
     {
-        protected int pointsCount;
-        protected Random random;
+        protected readonly int pointsCount;
 
         protected PiCalculator(int pointsCount)
         {
             this.pointsCount = pointsCount;
-            this.random = new Random();
         }
 
         public abstract PiCalculationResult CalculatePi();
 
-        protected static bool IsInside(double x, double y)
+        public abstract override string ToString();
+
+        protected static double CalculatePi(IList<Point> points)
         {
-            double l = Math.Sqrt(x * x + y * y);
-            return l <= 1;
+            return CalculatePi(points, 0, points.Count);
         }
 
-        protected Point GeneratePoint()
+        protected static double CalculatePi(IList<Point> points, int startIndex, int length)
         {
-            var point = new Point(random.NextDouble(), random.NextDouble());
-            return point;
+            int inside = 0;
+            int endIndex = startIndex + length;
+            for (int i = startIndex; i < endIndex; i++)
+            {
+                Point point = points[i];
+                if (IsInside(point))
+                {
+                    inside++;
+                }
+            }
+            double pi = 4.0 / length * inside;
+            return pi;
+        }
+
+        private static bool IsInside(Point point)
+        {
+            double x = point.X;
+            double y = point.Y;
+            double l = Math.Sqrt(x * x + y * y);
+            return l <= 1;
         }
     }
 }
