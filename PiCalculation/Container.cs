@@ -13,23 +13,5 @@
             get;
             init;
         }
-
-        public required IList<Point> Points
-        {
-            get;
-            init;
-        }
-
-        public required int StartIndex
-        {
-            get;
-            init;
-        }
-
-        public required int Length
-        {
-            get;
-            init;
-        }
     }
 }
