@@ -1,27 +1,17 @@
-﻿using System.Diagnostics;
+﻿namespace PiCalculation;
 
-namespace PiCalculation
+public class OneThreadCalculator : PiCalculator
 {
-    public class OneThreadCalculator : PiCalculator
-    {
-        public OneThreadCalculator(int pointsCount) : base(pointsCount)
-        {
-        }
+	public OneThreadCalculator(int pointsCount) : base(pointsCount)
+	{
+	}
 
-        public override PiCalculationResult CalculatePi()
-        {
-            Stopwatch timer = Stopwatch.StartNew();
+	public override string Name => "One Thread";
 
-            IList<Point> points = Point.GeneratePoints(pointsCount);
-            double pi = CalculatePi(points);
-
-            timer.Stop();
-            return new PiCalculationResult(pi, timer.Elapsed);
-        }
-
-        public override string ToString()
-        {
-            return "One Thread";
-        }
-    }
+	public override double CalculatePi()
+	{
+		var points = Point.GeneratePoints(PointsCount);
+		var pi = CalculatePi(points);
+		return pi;
+	}
 }
