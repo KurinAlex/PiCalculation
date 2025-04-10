@@ -1,67 +1,55 @@
-﻿using System.Diagnostics;
+﻿namespace PiCalculation;
 
-namespace PiCalculation
+public class MultiThreadingCalculator : PiCalculator
 {
-    public class MultiThreadingCalculator : PiCalculator
-    {
-        private readonly int threadsCount;
+	private readonly int _threadsCount;
 
-        public MultiThreadingCalculator(int pointsCount, int threadsCount) : base(pointsCount)
-        {
-            this.threadsCount = threadsCount;
-        }
+	public MultiThreadingCalculator(int pointsCount, int threadsCount) : base(pointsCount)
+	{
+		_threadsCount = threadsCount;
+	}
 
-        public override PiCalculationResult CalculatePi()
-        {
-            Stopwatch timer = Stopwatch.StartNew();
+	public override string Name => "Multi Threading";
 
-            IList<Point> points = Point.GeneratePoints(pointsCount);
+	public override double CalculatePi()
+	{
+		var points = Point.GeneratePoints(PointsCount);
 
-            var containers = new List<Container>(threadsCount);
-            var countdownEvent = new CountdownEvent(threadsCount);
-            for (int i = 0; i < threadsCount; i++)
-            {
-                var container = new Container
-                {
-                    Event = countdownEvent,
-                    Points = points,
-                    StartIndex = i * pointsCount / threadsCount,
-                    Length = pointsCount / threadsCount,
-                };
-                containers.Add(container);
+		var containers = new List<Container>(_threadsCount);
+		var countdownEvent = new CountdownEvent(_threadsCount);
+		var length = PointsCount / _threadsCount;
 
-                var thread = new Thread(new ParameterizedThreadStart(Run));
-                thread.Start(container);
-            }
+		for (var i = 0; i < _threadsCount; i++)
+		{
+			var container = new Container
+			{
+				Event = countdownEvent,
+				Points = points,
+				StartIndex = length * i,
+				Length = length
+			};
+			containers.Add(container);
 
-            countdownEvent.Wait();
+			var thread = new Thread(Run);
+			thread.Start(container);
+		}
 
-            double pi = 0.0;
-            foreach (Container container in containers)
-            {
-                pi += container.Pi;
-            }
-            pi /= threadsCount;
+		countdownEvent.Wait();
 
-            timer.Stop();
-            return new PiCalculationResult(pi, timer.Elapsed);
-        }
+		var pi = containers.Sum(container => container.Pi);
+		pi /= _threadsCount;
+		return pi;
+	}
 
-        public override string ToString()
-        {
-            return "Multi Threading";
-        }
+	private static void Run(object? obj)
+	{
+		if (obj is not Container container)
+		{
+			throw new ArgumentException("Wrong object type", nameof(obj));
+		}
 
-        private void Run(object? obj)
-        {
-            if (obj is not Container container)
-            {
-                throw new ArgumentException("Wrong object type", nameof(obj));
-            }
-
-            double pi = CalculatePi(container.Points, container.StartIndex, container.Length);
-            container.Pi = pi;
-            container.Event.Signal();
-        }
-    }
+		var pi = CalculatePi(container.Points, container.StartIndex, container.Length);
+		container.Pi = pi;
+		container.Event.Signal();
+	}
 }

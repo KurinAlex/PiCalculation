@@ -1,44 +1,48 @@
-﻿namespace PiCalculation
+﻿using System.Diagnostics;
+
+namespace PiCalculation;
+
+internal static class Program
 {
-    internal static class Program
-    {
-        static int EnterInt32(string name)
-        {
-            int res;
-            string? input;
-            do
-            {
-                Console.Write($"Enter {name}: ");
-                input = Console.ReadLine();
-            } while (!int.TryParse(input, out res));
-            return res;
-        }
+	private static int EnterInt32(string name)
+	{
+		int res;
+		string? input;
+		do
+		{
+			Console.Write($"Enter {name}: ");
+			input = Console.ReadLine();
+		} while (!int.TryParse(input, out res));
 
-        public static void Main()
-        {
-            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+		return res;
+	}
 
-            int pointsCount = EnterInt32("points count");
-            int threadsCount = EnterInt32("threads count");
+	public static void Main()
+	{
+		Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
 
-            PiCalculator[] calculators = {
-                new OneThreadCalculator(pointsCount),
-                new MultiThreadingCalculator(pointsCount, threadsCount)
-            };
+		var pointsCount = EnterInt32("points count");
+		var threadsCount = EnterInt32("threads count");
 
-            foreach (var calculator in calculators)
-            {
-                PiCalculationResult result = calculator.CalculatePi();
+		PiCalculator[] calculators =
+		{
+			new OneThreadCalculator(pointsCount),
+			new MultiThreadingCalculator(pointsCount, threadsCount)
+		};
 
-                double pi = result.Pi;
-                double error = Math.Abs((Math.PI - result.Pi) / Math.PI) * 100.0;
+		foreach (var calculator in calculators)
+		{
+			var stopwatch = Stopwatch.StartNew();
+			var pi = calculator.CalculatePi();
+			stopwatch.Stop();
 
-                Console.WriteLine();
-                Console.WriteLine($"{calculator}:");
-                Console.WriteLine($"- Elapsed Time:   {result.Elapsed.TotalSeconds} seconds");
-                Console.WriteLine($"- Computed pi:    {pi}");
-                Console.WriteLine($"- Relative error: {error} %");
-            }
-        }
-    }
+			var error = Math.Abs((Math.PI - pi) / Math.PI) * 100.0;
+
+			Console.WriteLine();
+			Console.WriteLine($"{calculator.Name}:");
+			Console.WriteLine($"- Elapsed Time:   {stopwatch.Elapsed.TotalSeconds} seconds");
+			Console.WriteLine($"- Computed pi:    {pi}");
+			Console.WriteLine($"- Relative error: {error} %");
+		}
+	}
 }
